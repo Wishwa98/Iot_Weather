@@ -1,0 +1,282 @@
+[
+    {
+        "id": "bb0dce598af6282e",
+        "type": "tab",
+        "label": "Flow 3",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "fb7daafcdf3cc2e8",
+        "type": "inject",
+        "z": "bb0dce598af6282e",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 380,
+        "y": 280,
+        "wires": [
+            [
+                "fe8d5472162963bd"
+            ]
+        ]
+    },
+    {
+        "id": "fe8d5472162963bd",
+        "type": "file in",
+        "z": "bb0dce598af6282e",
+        "name": "Model CSV",
+        "filename": "D:\\IOT\\Forecast.csv",
+        "filenameType": "str",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 570,
+        "y": 380,
+        "wires": [
+            [
+                "2b1371ee207d547c"
+            ]
+        ]
+    },
+    {
+        "id": "2b1371ee207d547c",
+        "type": "csv",
+        "z": "bb0dce598af6282e",
+        "name": "CSV TO JSON",
+        "sep": ",",
+        "hdrin": true,
+        "hdrout": "none",
+        "multi": "mult",
+        "ret": "\\r\\n",
+        "temp": "Date,RH Prediction",
+        "skip": "0",
+        "strings": true,
+        "include_empty_strings": false,
+        "include_null_values": false,
+        "x": 820,
+        "y": 480,
+        "wires": [
+            [
+                "4f8edddff27d6d8d",
+                "b3f7e0e8f40686c0",
+                "c58de1f7c77b98d9"
+            ]
+        ]
+    },
+    {
+        "id": "4f8edddff27d6d8d",
+        "type": "debug",
+        "z": "bb0dce598af6282e",
+        "name": "CSV to Json Debug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1110,
+        "y": 740,
+        "wires": []
+    },
+    {
+        "id": "451a40b0d7bd7c86",
+        "type": "ui_chart",
+        "z": "bb0dce598af6282e",
+        "name": "Past Predictions",
+        "group": "b54c56e5fa18bcd4",
+        "order": 1,
+        "width": 20,
+        "height": 4,
+        "label": "Past Prediction chart",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "Y-M-D",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "75",
+        "ymax": "95",
+        "removeOlder": "0",
+        "removeOlderPoints": "1000",
+        "removeOlderUnit": "86400",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#05e114",
+            "#05e114",
+            "#05e114",
+            "#05e114",
+            "#05e114",
+            "#05e114",
+            "#05e114",
+            "#05e114",
+            "#05e114"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1440,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "b3f7e0e8f40686c0",
+        "type": "function",
+        "z": "bb0dce598af6282e",
+        "name": "Past Prediction Function",
+        "func": "function toTimestamp(strDate) {\n    var date = new Date(strDate);\n    return date.getTime();\n}\n\n\nvar payload = msg.payload;\nvar t = new Date().getTime();\n//var lastYear = new Date().setFullYear(new Date().getFullYear()-1);\nvar lastYear = new Date();\nlastYear.setFullYear(lastYear.getFullYear()-1); \n\nvar data_out = [];\nvar al = [];\n\nfor (let i = 0; i < payload.length; i++) {\n    var timestamp = toTimestamp(payload[i][\"Date\"]);\n    node.log(timestamp);\n    \n    \n    if (timestamp < t && timestamp >= lastYear.getTime()) {\n        var templ = { \"x\": timestamp, \"y\": parseFloat(payload[i][\"ARIMA Predictions\"]) };\n        al.push(templ);\n    }\n}\n\ndata_out = [al];\nmsg.payload = [{\n    \"series\": [\"ARIMA Predictions\"],\n    \"data\": data_out,\n    \"labels\": [\"ARIMA Predictions\"]\n}];\nmsg.t = t;\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1130,
+        "y": 200,
+        "wires": [
+            [
+                "451a40b0d7bd7c86",
+                "76142ed493ac7374"
+            ]
+        ]
+    },
+    {
+        "id": "76142ed493ac7374",
+        "type": "debug",
+        "z": "bb0dce598af6282e",
+        "name": "Past Function Debug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1440,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "a1e344972db81e73",
+        "type": "ui_chart",
+        "z": "bb0dce598af6282e",
+        "name": "Future Predictions",
+        "group": "b54c56e5fa18bcd4",
+        "order": 2,
+        "width": 20,
+        "height": 4,
+        "label": "Future Prediction chart",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "Y-M-D",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "75",
+        "ymax": "95",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#05e114",
+            "#05e114",
+            "#05e114",
+            "#05e114",
+            "#05e114",
+            "#05e114",
+            "#05e114",
+            "#05e114",
+            "#05e114"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1450,
+        "y": 420,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "c58de1f7c77b98d9",
+        "type": "function",
+        "z": "bb0dce598af6282e",
+        "name": "Future Prediction Function",
+        "func": "function toTimestamp(strDate) {\n    var date = new Date(strDate);\n    return date.getTime();\n}\n\nvar payload = msg.payload;\nvar t = new Date().getTime();\nvar nextYear = new Date();\nnextYear.setFullYear(nextYear.getFullYear() + 1); \n\n\nvar data_out = [];\nvar al = [];\n\nfor (let i = 0; i < payload.length; i++) {\n    var timestamp = toTimestamp(payload[i][\"Date\"]);\n    node.log(timestamp);\n    var templ = { \"x\": timestamp, \"y\": parseFloat(payload[i][\"ARIMA Predictions\"]) };\n\n    if (timestamp > t && timestamp <= nextYear.getTime()){\n        al.push(templ);\n    } \n}\n\ndata_out = [al];\nmsg.payload = [{\n    \"series\": [\"ARIMA Predictions\"],\n    \"data\": data_out,\n    \"labels\": [\"ARIMA Predictions\"]\n}];\nmsg.t = t;\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1120,
+        "y": 480,
+        "wires": [
+            [
+                "a1e344972db81e73",
+                "a376c58562429d74"
+            ]
+        ]
+    },
+    {
+        "id": "a376c58562429d74",
+        "type": "debug",
+        "z": "bb0dce598af6282e",
+        "name": "Future Function Debug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1460,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "b54c56e5fa18bcd4",
+        "type": "ui_group",
+        "name": "Predictions",
+        "tab": "6cb9ca3bae2e45fc",
+        "order": 4,
+        "disp": true,
+        "width": 20,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "6cb9ca3bae2e45fc",
+        "type": "ui_tab",
+        "name": "RH & Temp",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]
